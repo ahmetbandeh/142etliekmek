@@ -1,0 +1,18 @@
+{
+  // Worker adı, Cloudflare'deki projenin adıyla AYNI olmalı (adresin başındaki kısım).
+  "name": "142etliekmek",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "MENU_KV",
+      // Cloudflare → KV sayfasındaki depo kimliğini (ID) tırnakların içine yapıştır:
+      "id": "bcd4250184674a7785e420cab0f06b76"
+    }
+  ]
+}
