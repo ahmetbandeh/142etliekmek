@@ -180,7 +180,7 @@ const say=t=>{const n=document.getElementById('st');if(n)n.textContent=t};
 const at=(f,si,ii)=>'data-f="'+f+'" data-si="'+si+'" data-ii="'+ii+'"';
 function login(){noScroll(1);ad.hidden=false;ad.innerHTML='<form class="ap lg" id="lf"><h3>Yönetici girişi</h3><input id="lu" placeholder="Kullanıcı adı" autocomplete="username"><input id="lp" type="password" placeholder="Şifre" autocomplete="current-password"><p class="er" id="le"></p><button class="pr">Giriş</button><button type="button" id="lc">Kapat</button></form>';document.getElementById('lu').focus()}
 function dash(){const y=ad.scrollTop;noScroll(1);ad.hidden=false;
-ad.innerHTML='<div class="ap"><div class="ah"><h3>Yönetim paneli</h3><span><button class="pr" id="sv" type="button">Kaydet ve yayınla</button> <button type="button" id="lo">Çıkış</button></span></div><p class="er" id="st"></p>'
+ad.innerHTML='<div class="ap"><div class="ah"><h3>Yönetim paneli</h3><span><button class="pr" id="sv" type="button">Kaydet ve yayınla</button> <button type="button" id="lo">Çıkış</button></span></div><p class="er" id="st"></p><details><summary>Kullanıcı adı ve şifre</summary><div class="ir2"><input id="ac_cur" type="password" placeholder="Mevcut şifre" autocomplete="current-password"><input id="ac_user" placeholder="Yeni kullanıcı adı (boş bırakırsan değişmez)" autocomplete="off"><input id="ac_new" type="password" placeholder="Yeni şifre (en az 8 karakter)" autocomplete="new-password"><input id="ac_new2" type="password" placeholder="Yeni şifre (tekrar)" autocomplete="new-password"><button type="button" id="ap">Uygula</button></div></details>'
 +D.map((s,si)=>'<fieldset><div class="sh"><input '+at('t',si,0)+' value="'+esc(s[1])+'" aria-label="Kategori adı"><input '+at('s',si,0)+' value="'+esc(s[2])+'" placeholder="Alt başlık" aria-label="Alt başlık"></div>'
 +s[3].map((r,ii)=>'<div class="ir"><input class="c2" '+at(0,si,ii)+' value="'+esc(r[0])+'" aria-label="Ürün adı"><input type="number" min="0" '+at(2,si,ii)+' value="'+(+r[2]||0)+'" aria-label="Fiyat TL"><input type="number" min="0" '+at(3,si,ii)+' value="'+(+r[3]||0)+'" aria-label="Kalori"><input class="c2" '+at(1,si,ii)+' value="'+esc(r[1])+'" placeholder="Açıklama" aria-label="Açıklama"><input '+at(4,si,ii)+' value="'+esc(r[4])+'" placeholder="Etiket" aria-label="Etiket"><button type="button" data-del="'+si+','+ii+'" aria-label="Ürünü sil">✕</button><label class="sw"><input type="checkbox" '+at(6,si,ii)+(r[6]?'':' checked')+'><span>Satışta</span></label><label class="sw"><input type="checkbox" '+at(7,si,ii)+(r[7]?'':' checked')+'><span>Yarım porsiyon seçilebilsin</span></label></div>').join('')
 +'<button type="button" data-add="'+si+'">+ Ürün ekle</button></fieldset>').join('')+'</div>';ad.scrollTop=y}
@@ -202,7 +202,15 @@ ad.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)r
 if(b.id==='lc'||b.id==='lo'){if(b.id==='lo')fetch('/api/login',{method:'DELETE',credentials:'same-origin'}).catch(_=>{});ad.hidden=true;ad.innerHTML='';noScroll(0)}
 else if(b.dataset.add!=null){D[+b.dataset.add][3].push(['Yeni ürün','',0,0,'','']);dash()}
 else if(b.dataset.del){if(b.dataset.arm){const[a,c]=b.dataset.del.split(',');D[+a][3].splice(+c,1);dash()}else{b.dataset.arm=1;b.textContent='Sil?';setTimeout(()=>{b.dataset.arm='';b.textContent='✕'},3000)}}
-else if(b.id==='ap'){const nu=document.getElementById('nu').value.trim(),np=document.getElementById('np').value;if(np&&np.length<6){say('Şifre en az 6 karakter olmalı.');return}if(nu)CFG.u=nu;if(np)CFG.h=await sha(np);say('Yeni giriş bilgileri hazır. Kalıcı olması için “Kaydet ve yayınla”ya bas.')}
+else if(b.id==='ap'){const g=x=>document.getElementById(x).value,cur=g('ac_cur'),nu=g('ac_user').trim(),np=g('ac_new'),np2=g('ac_new2');
+if(!cur){say('Önce mevcut şifreni yaz.');return}
+if(!nu&&!np){say('Yeni kullanıcı adı ya da yeni şifre yaz.');return}
+if(np&&np.length<8){say('Yeni şifre en az 8 karakter olmalı.');return}
+if(np!==np2){say('Yeni şifre iki kutuda aynı değil.');return}
+say('Uygulanıyor…');
+try{const r=await fetch('/api/account',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({cp:cur,nu,np})});const j=await r.json().catch(()=>({}));
+if(r.ok){['ac_cur','ac_user','ac_new','ac_new2'].forEach(x=>{document.getElementById(x).value=''});say('Giriş bilgileri değişti. Bir sonraki girişte yenisini kullan.')}
+else say(j.error||('Hata '+r.status))}catch(_){say('Sunucuya ulaşılamıyor.')}}
 else if(b.id==='sv')save()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ad.hidden&&document.getElementById('lf')){ad.hidden=true;ad.innerHTML='';noScroll(0)}});
 

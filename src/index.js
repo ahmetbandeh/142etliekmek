@@ -2,8 +2,9 @@
 import * as menu from './api/menu.js';
 import * as login from './api/login.js';
 import * as save from './api/save.js';
+import * as account from './api/account.js';
 
-const routes = { '/api/menu': menu, '/api/login': login, '/api/save': save };
+const routes = { '/api/menu': menu, '/api/login': login, '/api/save': save, '/api/account': account };
 const reply = (obj, status) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 
